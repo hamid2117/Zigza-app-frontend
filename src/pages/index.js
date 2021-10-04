@@ -11,6 +11,8 @@ import CashBook from './CashBooklist'
 import CashBookEdit from './CashBookEdit'
 import Productlist from './Productlist'
 import ProductEdit from './ProductEdit'
+import ForgetPage from './ForgetPage'
+import UpdatePassword from './UpdatePassword'
 export {
   Account,
   Error,
@@ -22,6 +24,8 @@ export {
   Userlist,
   Dashboard,
   CashBook,
+  ForgetPage,
+  UpdatePassword,
   CashBookEdit,
   Productlist,
   ProductEdit,

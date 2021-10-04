@@ -10,7 +10,6 @@ import {
 } from '@material-ui/core'
 import { useFormik } from 'formik'
 import { useAuthContext } from '../../context/AuthContext'
-import { Redirect, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 import { devApi } from '../../api'
@@ -53,20 +52,23 @@ export default function SignIn() {
     setpinerror(false)
     setEmailerror(false)
     const { ...data } = value
-    const response = await axios.post(`${devApi}login`, data).catch((e) => {
-      if (e && e.response) {
-        if (e.response.status === 400) {
-          setEmailerror(true)
+    const response = await axios
+      .post(`${devApi}forgetpassword`, data)
+      .catch((e) => {
+        if (e && e.response) {
           setLoading(false)
-        }
-        if (e.response.status === 403) {
-          setEmailerror(false)
-          setLoading(false)
+          if (e.response.status === 400) {
+            setEmailerror(true)
+            setLoading(false)
+          }
+          if (e.response.status === 403) {
+            setEmailerror(false)
+            setLoading(false)
 
-          setpinerror(true)
+            setpinerror(true)
+          }
         }
-      }
-    })
+      })
     if (response && response.data) {
       loginData(response.data)
       formik.resetForm()
@@ -75,7 +77,7 @@ export default function SignIn() {
       setTimeout(() => {
         setRedirect(true)
       }, 800)
-      toast.success('You are logged in .', {
+      toast.success('Email verification link is sended.', {
         position: 'top-center',
         autoClose: 5000,
         hideProgressBar: false,
@@ -91,10 +93,6 @@ export default function SignIn() {
     initialValues: { email: '', password: '' },
     onSubmit,
   })
-
-  if (redirect) {
-    return <Redirect to='/userlist' />
-  }
 
   return (
     <>
@@ -118,28 +116,6 @@ export default function SignIn() {
               style={{ paddign: 5 }}
               autoFocus
             />
-            <TextField
-              variant='standard'
-              margin='normal'
-              type='password'
-              required
-              fullWidth
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              helperText={pinerror && 'Wronge password'}
-              error={pinerror ? true : false}
-              id='password'
-              label='Password'
-              name='password'
-              autoComplete='password'
-              style={{ padding: 5 }}
-              autoFocus
-            />
-            <FormControlLabel
-              control={<Checkbox value='remember' color='primary' />}
-              label='Remember me'
-              style={{ marginTop: 1 }}
-            />
             <Button
               type='submit'
               fullWidth
@@ -148,12 +124,9 @@ export default function SignIn() {
               disabled={loading}
               className={classes.submit}
             >
-              {loading ? 'Loading...' : 'Sign In'}
+              {loading ? 'Loading...' : 'Send verification'}
             </Button>
           </form>
-          <div className={classes.forget}>
-            <Link to='/forget'>forgetPassowrd</Link>
-          </div>
         </div>
       </Container>
     </>

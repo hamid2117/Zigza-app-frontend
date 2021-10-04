@@ -16,6 +16,8 @@ import {
   CashBookEdit,
   Productlist,
   ProductEdit,
+  ForgetPage,
+  UpdatePassword,
 } from './pages'
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom'
 import AdminRoute from './utils/AdminRoute'
@@ -57,6 +59,12 @@ const App = () => {
           <Switch>
             <Route exact path='/'>
               <Account />
+            </Route>
+            <Route exact path='/forget'>
+              <ForgetPage />
+            </Route>
+            <Route exact path='/updatepassword/:token'>
+              <UpdatePassword />
             </Route>
             <AdminRoute exact path='/userlist'>
               <Userlist />

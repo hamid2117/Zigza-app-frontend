@@ -5,14 +5,13 @@ import {
   CssBaseline,
   makeStyles,
   Container,
-  Checkbox,
-  FormControlLabel,
 } from '@material-ui/core'
 import { useFormik } from 'formik'
 import { useAuthContext } from '../../context/AuthContext'
-import { Redirect, Link } from 'react-router-dom'
+import { Redirect, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import axios from 'axios'
+import * as yup from 'yup'
 import { devApi } from '../../api'
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -40,6 +39,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const validationSchema = yup.object({
+  newpassword: yup
+    .string()
+    .min(8, 'Please enter strong password')
+    .required('Password is required'),
+  confirmPassword: yup
+    .string()
+    .when('password', {
+      is: (val) => (val && val.length > 0 ? true : false),
+      then: yup
+        .string()
+        .oneOf([yup.ref('password')], 'Password does not matched'),
+    })
+    .required('Password is required'),
+})
+
 export default function SignIn() {
   const classes = useStyles()
   const [phoneerror, setEmailerror] = useState(false)
@@ -47,26 +62,29 @@ export default function SignIn() {
   const [pinerror, setpinerror] = useState(false)
   const [loading, setLoading] = useState(false)
   const { loginData } = useAuthContext()
-
+  const { token } = useParams()
   const onSubmit = async (value) => {
     setLoading(true)
     setpinerror(false)
     setEmailerror(false)
     const { ...data } = value
-    const response = await axios.post(`${devApi}login`, data).catch((e) => {
-      if (e && e.response) {
-        if (e.response.status === 400) {
-          setEmailerror(true)
+    const response = await axios
+      .get(`${devApi}updatepassword/${token}`, data)
+      .catch((e) => {
+        if (e && e.response) {
           setLoading(false)
-        }
-        if (e.response.status === 403) {
-          setEmailerror(false)
-          setLoading(false)
+          if (e.response.status === 400) {
+            setEmailerror(true)
+            setLoading(false)
+          }
+          if (e.response.status === 403) {
+            setEmailerror(false)
+            setLoading(false)
 
-          setpinerror(true)
+            setpinerror(true)
+          }
         }
-      }
-    })
+      })
     if (response && response.data) {
       loginData(response.data)
       formik.resetForm()
@@ -75,7 +93,7 @@ export default function SignIn() {
       setTimeout(() => {
         setRedirect(true)
       }, 800)
-      toast.success('You are logged in .', {
+      toast.success('Your password is saved .', {
         position: 'top-center',
         autoClose: 5000,
         hideProgressBar: false,
@@ -88,12 +106,17 @@ export default function SignIn() {
   }
 
   const formik = useFormik({
-    initialValues: { email: '', password: '' },
+    initialValues: {
+      newpassword: '',
+      confirmPassword: '',
+    },
+    validateOnBlur: true,
     onSubmit,
+    validationSchema,
   })
 
   if (redirect) {
-    return <Redirect to='/userlist' />
+    return <Redirect to='/' />
   }
 
   return (
@@ -103,57 +126,63 @@ export default function SignIn() {
         <div className={classes.paper}>
           <form className={classes.form} onSubmit={formik.handleSubmit}>
             <TextField
+              name='newpassword'
+              type='password'
+              id='newpassword'
+              autoComplete='none'
+              label='New Password'
               variant='standard'
-              margin='normal'
-              required
               fullWidth
-              value={formik.values.email}
+              value={formik.values.newpassword}
               onChange={formik.handleChange}
-              helperText={phoneerror && 'This phone email not registered'}
-              error={phoneerror ? true : false}
-              id='email'
-              label='Email'
-              name='email'
-              autoComplete='email'
-              style={{ paddign: 5 }}
-              autoFocus
+              onBlur={formik.handleBlur}
+              required
+              error={
+                formik.touched.newpassword && formik.errors.newpassword
+                  ? true
+                  : false
+              }
+              helperText={
+                formik.touched.newpassword && formik.errors.newpassword
+                  ? formik.errors.newpassword
+                  : null
+              }
             />
             <TextField
-              variant='standard'
-              margin='normal'
+              name='confirmPassword'
               type='password'
-              required
+              id='confirmPassword'
+              autoComplete='none'
+              id='filled-disabled'
+              label='Confirm Password'
+              variant='standard'
               fullWidth
-              value={formik.values.password}
+              value={formik.values.confirmPassword}
               onChange={formik.handleChange}
-              helperText={pinerror && 'Wronge password'}
-              error={pinerror ? true : false}
-              id='password'
-              label='Password'
-              name='password'
-              autoComplete='password'
-              style={{ padding: 5 }}
-              autoFocus
-            />
-            <FormControlLabel
-              control={<Checkbox value='remember' color='primary' />}
-              label='Remember me'
-              style={{ marginTop: 1 }}
+              onBlur={formik.handleBlur}
+              required
+              error={
+                formik.touched.confirmPassword && formik.errors.confirmPassword
+                  ? true
+                  : false
+              }
+              helperText={
+                formik.touched.confirmPassword && formik.errors.confirmPassword
+                  ? formik.errors.confirmPassword
+                  : null
+              }
             />
             <Button
               type='submit'
               fullWidth
-              variant='outlined'
+              variant='standard'
               color='primary'
               disabled={loading}
               className={classes.submit}
             >
-              {loading ? 'Loading...' : 'Sign In'}
+              {loading ? 'Loading...' : 'Reset Password'}
             </Button>
           </form>
-          <div className={classes.forget}>
-            <Link to='/forget'>forgetPassowrd</Link>
-          </div>
         </div>
       </Container>
     </>
