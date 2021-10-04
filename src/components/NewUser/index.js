@@ -56,10 +56,10 @@ const useStyles = makeStyles((theme) => ({
   },
   sign: {
     backgroundColor: '#ffb733',
-    
+
     '&:hover': {
       backgroundColor: '#ffd280',
-      color:"#4d3200",
+      color: '#4d3200',
     },
   },
 }))
@@ -75,7 +75,7 @@ export default function NewUser() {
   const onSubmit = async (value) => {
     const data = { ...value, birthday: selectedDate }
     console.log(data)
-    const response = await axios.post(`${devApi}user`, data).catch((e) => {
+    const response = await axios.post(`${devApi}useradmin`, data).catch((e) => {
       if (e && e.response) {
         if (e.response.status === 400) {
           setPhoneerror(true)
@@ -92,9 +92,9 @@ export default function NewUser() {
   const formik = useFormik({
     initialValues: {
       email: '',
-      username:"",
+      username: '',
       phone: '',
-      passwrod:"",
+      passwrod: '',
     },
     onSubmit,
   })
@@ -130,7 +130,7 @@ export default function NewUser() {
             <Divider />
             <form onSubmit={formik.handleSubmit} className={classes.inputs}>
               <Grid container spacing={2}>
-                <Grid item  xs={12}>
+                <Grid item xs={12}>
                   <TextField
                     id='username'
                     name='username'
@@ -144,7 +144,7 @@ export default function NewUser() {
                     autoComplete='username'
                   />
                 </Grid>
-                 <Grid item xs={12}>
+                <Grid item xs={12}>
                   <TextField
                     id='email'
                     name='email'
@@ -158,7 +158,7 @@ export default function NewUser() {
                     autoComplete='email'
                   />
                 </Grid>
-                <Grid item xs={12} >
+                <Grid item xs={12}>
                   <TextField
                     id='phone'
                     name='phone'
@@ -177,7 +177,7 @@ export default function NewUser() {
                     id='password'
                     name='password'
                     variant='standard'
-                    type="password"
+                    type='password'
                     label='Password'
                     required
                     value={formik.values.password}
@@ -186,8 +186,6 @@ export default function NewUser() {
                     fullWidth
                   />
                 </Grid>
-                
-
               </Grid>
               <Button className={classes.sign} type='submit'>
                 add User
